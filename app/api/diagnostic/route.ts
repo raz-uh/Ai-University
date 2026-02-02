@@ -14,6 +14,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        if (!supabaseAdmin) {
+            return NextResponse.json({ error: 'Database connection not initialized' }, { status: 500 });
+        }
+
         // Step 1: Conduct diagnostic interview
         const diagnosticResult = await conductDiagnosticInterview(responses, language);
 

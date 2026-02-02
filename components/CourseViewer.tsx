@@ -30,6 +30,8 @@ export default function CourseViewer({ userId, onClose, onCompleteQuiz }: Course
     const [showQuiz, setShowQuiz] = useState(false);
     const [currentQuizStep, setCurrentQuizStep] = useState(0);
     const [quizCompleted, setQuizCompleted] = useState(false);
+    const [feedbackInputs, setFeedbackInputs] = useState<{ [key: number]: string }>({});
+    const [isPersonalizing, setIsPersonalizing] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -68,6 +70,41 @@ export default function CourseViewer({ userId, onClose, onCompleteQuiz }: Course
         setQuizCompleted(true);
         playSuccess();
         onCompleteQuiz(250); // Fixed XP for now
+    };
+
+    const handlePersonalize = async (moduleIndex: number) => {
+        if (isPersonalizing !== null || !selectedCourse) return;
+        const feedback = feedbackInputs[moduleIndex];
+        if (!feedback) return;
+
+        setIsPersonalizing(moduleIndex);
+        try {
+            const response = await fetch('/api/personalize-lesson', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    courseId: selectedCourse.id,
+                    moduleIndex,
+                    feedback,
+                    language: t('lang_name') || 'English' // Fallback to context language
+                })
+            });
+
+            const data = await response.json();
+            if (data.success && data.updatedCourse) {
+                // Update local state
+                setCourses(prev => prev.map(c => c.id === selectedCourse.id ? data.updatedCourse : c));
+                setSelectedCourse(data.updatedCourse);
+                setFeedbackInputs({ ...feedbackInputs, [moduleIndex]: '' });
+                playSuccess();
+            } else {
+                console.error('Failed to personalize:', data.error);
+            }
+        } catch (error) {
+            console.error('Error in personalization flow:', error);
+        } finally {
+            setIsPersonalizing(null);
+        }
     };
 
     return (
@@ -137,9 +174,41 @@ export default function CourseViewer({ userId, onClose, onCompleteQuiz }: Course
 
                                         <div className="space-y-6">
                                             {selectedCourse.jsonb_content.modules.map((module: any, idx: number) => (
-                                                <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors">
-                                                    <h4 className="text-xl font-bold text-indigo-300 mb-3">Module {idx + 1}: {module.title}</h4>
-                                                    <p className="text-gray-300 leading-relaxed">{module.content}</p>
+                                                <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors group">
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <h4 className="text-xl font-bold text-indigo-300">Module {idx + 1}: {module.title}</h4>
+                                                    </div>
+                                                    <p className="text-gray-300 leading-relaxed mb-6">{module.content}</p>
+
+                                                    {/* Personalization Section */}
+                                                    <div className="mt-4 pt-4 border-t border-white/5">
+                                                        <div className="flex items-center gap-2 mb-3">
+                                                            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                                                            <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">{t('personalize_lesson')}</span>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                value={feedbackInputs[idx] || ''}
+                                                                onChange={(e) => setFeedbackInputs({ ...feedbackInputs, [idx]: e.target.value })}
+                                                                placeholder={t('feedback_placeholder')}
+                                                                className="flex-1 bg-black/40 border border-indigo-500/20 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-all"
+                                                                disabled={isPersonalizing !== null}
+                                                            />
+                                                            <button
+                                                                onClick={() => handlePersonalize(idx)}
+                                                                disabled={isPersonalizing !== null || !feedbackInputs[idx]}
+                                                                className="px-4 py-2 bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/30 rounded-xl text-xs font-bold text-indigo-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                {isPersonalizing === idx ? (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-3 h-3 border-2 border-indigo-300 border-t-transparent animate-spin rounded-full" />
+                                                                        {t('personalizing')}
+                                                                    </div>
+                                                                ) : 'Apply AI Magic'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>

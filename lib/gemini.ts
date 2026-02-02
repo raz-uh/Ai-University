@@ -73,3 +73,25 @@ Return ONLY a valid JSON object in this format:
     throw new Error("Invalid syllabus format");
   }
 }
+
+export const personalizeModule = async (title: string, content: string, feedback: string, language: string) => {
+  const model = getGeminiModel();
+  const prompt = `You are an adaptive learning AI. A user is studying a module titled "${title}" with the following content:
+  
+"${content}"
+
+The user has the following feedback/request for this specific module:
+"${feedback}"
+
+Your task is to REWRITE the content of this module to address the user's feedback while maintaining the educational value.
+- If they want it simpler, use easier analogies.
+- If they want more examples, provide them.
+- If they are confused, explain the core concepts more clearly.
+
+OUTPUT: Return ONLY the new content string. No JSON, no preamble, just the text.
+The output MUST be in ${language}.`;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  return response.text().trim();
+};
