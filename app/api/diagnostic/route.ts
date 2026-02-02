@@ -85,7 +85,11 @@ export async function POST(request: NextRequest) {
     } catch (error: any) {
         console.error('Diagnostic API error:', error);
         return NextResponse.json(
-            { error: 'Internal server error', details: error.message },
+            {
+                success: false,
+                error: error.message || 'Failed to conduct diagnostic interview',
+                details: error.stack
+            },
             { status: 500 }
         );
     }
