@@ -1,207 +1,110 @@
 # 🎓 AI Adaptive 3D University
 
-A decentralized learning platform featuring AI-powered adaptive learning, immersive 3D UI, and blockchain-based rewards.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Three.js](https://img.shields.io/badge/Three.js-r173-lightgrey?logo=three.js)](https://threejs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-green?logo=supabase)](https://supabase.com/)
+[![Gemini AI](https://img.shields.io/badge/Gemini_AI-Flash--1.5-orange?logo=google-gemini)](https://deepmind.google/technologies/gemini/)
 
-## ✨ Features
-
-- **3D Immersive UI**: Built with React Three Fiber and custom GLSL shaders
-- **AI-Powered Learning**: Gemini AI conducts diagnostic interviews and generates personalized course content
-- **Adaptive Content**: Multi-format courses (Video, PDF, Flashcards) based on learning preferences
-- **Multilingual Support**: Fully localized UI and AI-generated content in **Nepali**, English, Spanish, French, and more.
-- **Blockchain Rewards**: ERC-20 tokens distributed to top 5 performers on Sepolia testnet
-- **Real-time Leaderboard**: Track progress and compete with other learners
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Next.js 14 (App Router), React, TypeScript, Tailwind CSS
-- **3D Graphics**: React Three Fiber, Drei, Three.js
-- **Animations**: Framer Motion
-- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
-- **AI**: Google Generative AI (Gemini)
-- **Blockchain**: Hardhat, Ethers.js, OpenZeppelin, Sepolia Testnet
-
-## 📦 Setup Instructions
-
-### 1. Install Dependencies
-
-```bash
-npm install
-```
-
-### 2. Configure Environment Variables
-
-Copy `.env.local.example` to `.env.local` and fill in your credentials:
-
-```bash
-cp .env.local.example .env.local
-```
-
-Required environment variables:
-- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anon key
-- `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
-- `GOOGLE_GEMINI_API_KEY`: Your Google Gemini API key (supports `GEMINI_API_KEY` as fallback)
-- `SEPOLIA_RPC_URL`: Sepolia RPC endpoint (e.g., Infura, Alchemy)
-- `DEPLOYER_PRIVATE_KEY`: Private key for deploying contracts
-- `EDUTOKEN_CONTRACT_ADDRESS`: (Will be set after deployment)
-
-### 3. Setup Supabase Database
- 
- 1. Create a new Supabase project at [supabase.com](https://supabase.com)
- 2. In the SQL Editor, copy and run the **entire content** of `supabase/schema.sql`.
-    - **CRITICAL**: This schema includes a special Trigger (`handle_new_user`) that automatically creates a user profile upon signup. Without this, the application will hang on login.
- 3. Enable Row Level Security (RLS) policies as defined in the schema (automatically handled by the script).
- 
- ### 4. Run Development Server
- 
- ```bash
- npm run dev
- ```
- 
- Open [http://localhost:3000](http://localhost:3000) to see the application.
- 
- ## ☁️ Deployment (Netlify/Vercel)
- 
- This project is ready for one-click deployment.
- 
- 1. Push your code to a Git repository (GitHub/GitLab).
- 2. Connect the repository to Netlify or Vercel.
- 3. **Environment Variables**: Add the following variables in your deployment settings (copy from `.env.local`):
-    - `NEXT_PUBLIC_SUPABASE_URL`
-    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-    - `GOOGLE_GEMINI_API_KEY`
-    - `SEPOLIA_RPC_URL` (Optional, for server scripts)
-    - `DEPLOYER_PRIVATE_KEY` (Optional, for server scripts)
- 4. Deploy! The application will automatically connect to your Supabase instance.
-
-
-## 🚀 Blockchain Deployment
-
-### Deploy EduToken Contract to Sepolia
-
-1. Ensure you have Sepolia ETH in your deployer wallet
-2. Run the deployment script:
-
-```bash
-npx hardhat run scripts/deploy.js --network sepolia
-```
-
-3. Copy the deployed contract address and add it to `.env.local`:
-
-```
-EDUTOKEN_CONTRACT_ADDRESS=0x...
-```
-
-### Distribute Weekly Rewards
-
-To distribute 100 EDU tokens to the top 5 performers:
-
-```bash
-npx hardhat run scripts/distributeRewards.js --network sepolia
-```
-
-This script:
-1. Queries the Supabase `leaderboard` materialized view
-2. Gets the top 5 users by XP
-3. Sends 100 EDU tokens to each wallet address
-
-## 📁 Project Structure
-
-```
-├── app/
-│   ├── api/
-│   │   └── diagnostic/       # AI diagnostic interview API
-│   └── page.tsx              # Main landing page
-├── components/
-│   ├── Scene.tsx             # 3D canvas wrapper
-│   ├── LandingHub.tsx        # 3D environment scene
-│   ├── AICore.tsx            # Pulsing AI sphere with shaders
-│   ├── UIOverlay.tsx         # 2D UI overlays
-│   └── DiagnosticAgent.tsx   # Interview modal
-├── contracts/
-│   └── EduToken.sol          # ERC-20 token contract
-├── lib/
-│   ├── supabase.ts           # Supabase client
-│   └── gemini.ts             # Gemini AI integration
-├── scripts/
-│   ├── deploy.js             # Contract deployment
-│   └── distributeRewards.js  # Token distribution
-├── supabase/
-│   └── schema.sql            # Database schema
-└── hardhat.config.js         # Hardhat configuration
-```
-
-## 🎮 Usage
-
-### For Learners
-
-1. **Sign Up / Login**: Create an account or log in
-2. **Select Language**: Use the HUD menu to switch to **Nepali** or any other supported language.
-3. **Start Diagnostic**: Click "Start Diagnostic" to begin the AI interview
-4. **Answer Questions**: Provide responses to 3 diagnostic questions (AI will ask and listen in your chosen language)
-5. **Get Personalized Courses**: AI generates custom courses with titles and content fully localized to your preference.
-5. **Complete Courses**: Study the generated materials
-6. **Take Quizzes**: Test your knowledge and earn XP
-7. **Climb the Leaderboard**: Top 5 performers receive 100 EDU tokens weekly
-
-### For Administrators
-
-#### Deploy Smart Contract
-```bash
-npx hardhat run scripts/deploy.js --network sepolia
-```
-
-#### Distribute Weekly Rewards
-```bash
-npx hardhat run scripts/distributeRewards.js --network sepolia
-```
-
-#### Refresh Leaderboard (if needed)
-```sql
-REFRESH MATERIALIZED VIEW CONCURRENTLY leaderboard;
-```
-
-## 🎨 3D Scene Features
-
-- **AI Core**: Central pulsing sphere with custom GLSL shaders
-- **Floating Rings**: Animated platform rings around the core
-- **Orbiting Particles**: Dynamic particle system
-- **Starfield Background**: Immersive space environment
-- **Interactive Controls**: 
-  - Drag to rotate camera
-  - Scroll to zoom
-  - Click to interact
-
-## 🔐 Security
-
-- Row Level Security (RLS) enabled on all Supabase tables
-- Users can only access their own profiles and courses
-- Smart contract uses OpenZeppelin's Ownable pattern
-- Only contract owner can distribute rewards
-
-## 📝 License
-
-MIT
-
-## 🤝 Contributing
-
-Contributions welcome! Please open an issue or submit a pull request.
-
-## 🎯 Verification
-
-After setup, verify:
-
-1. ✅ 3D scene loads with pulsing AI Core
-2. ✅ Diagnostic interview opens and collects responses
-3. ✅ Gemini AI generates course syllabi
-4. ✅ Courses save to Supabase
-5. ✅ Leaderboard displays top users
-6. ✅ Smart contract compiles and deploys
-7. ✅ Rewards distribute to top 5 wallets
+A state-of-the-art decentralized learning platform featuring **AI-powered adaptive learning**, immersive **3D graphics**, and **multilingual support** (pioneering localized education in Nepali and more).
 
 ---
 
-Built with ❤️ using Next.js, Three.js, Gemini AI, and Ethereum
-# Ai-University
-# Ai-University
-# Ai-University
+## 🚀 Key Features
+
+### 🧠 AI-Driven Adaptive Learning
+- **Diagnostic Interview**: A personalized 3-question interview conducted by Gemini AI to assess your level and learning style.
+- **Dynamic Course Generation**: AI generates full course syllabi (titles, modules, and content) customized specifically for you in real-time.
+- **Deep Personalization**: Content is tailored for **Beginner**, **Intermediate**, or **Advanced** levels across **Video**, **PDF**, or **Flashcard** preferences.
+
+### 🇳🇵 First-Class Multilingual Support
+Built with a global audience in mind, featuring deep localization:
+- **Nepali Support**: Full UI and AI content generation in Nepali.
+- **Extensible Framework**: Dynamic translation layer supporting English, Spanish, French, Hindi, and more.
+- **AI Local Awareness**: The AI "thinks" and responds in your chosen language, ensuring a native learning experience.
+
+### 🎨 Immersive 3D Ecosystem
+- **Interactive Canvas**: Custom 3D environment built with React Three Fiber.
+- **AI Core**: A visually stunning central hub with custom GLSL shaders that pulse during AI tasks.
+- **Dynamic Shadows & Particles**: Optimized space-themed background and particle systems for a premium feel.
+
+### ⛓️ Web3 & Rewards
+- **Leaderboard**: Compete with other learners via an XP-based ranking system.
+- **Blockchain Rewards**: Integrated Hardhat scripts for distributing EDU tokens (ERC-20) to top performers on the Sepolia testnet.
+
+---
+
+## 📦 Getting Started
+
+### 1. Prerequisites
+- Node.js (v18+)
+- A Supabase account
+- A Google Gemini API Key
+
+### 2. Installation
+```bash
+git clone https://github.com/raz-uh/Ai-University.git
+cd Ai-University
+npm install --legacy-peer-deps
+```
+
+### 3. Database Setup (Supabase)
+1. Create a project at [supabase.com](https://supabase.com).
+2. Go to the **SQL Editor** and run the entire content of [supabase/schema.sql](supabase/schema.sql).
+   - This creates the `profiles`, `courses`, and `leaderboard` tables.
+   - It also sets up the **CRITICAL** Auth trigger for user profiles.
+
+### 4. Environment Variables
+Copy the template and fill in your keys:
+```bash
+cp .env.example .env.local
+```
+Update `.env.local` with your `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `GOOGLE_GEMINI_API_KEY`.
+
+---
+
+## 🎨 Technology Stack
+
+- **Core**: Next.js 15 (App Router), React 19, TypeScript
+- **Visuals**: Three.js, React Three Fiber, Framer Motion
+- **AI**: Google Generative AI (Gemini Flash 1.5)
+- **Backend**: Supabase (PostgreSQL, Realtime, Row Level Security)
+- **Blockchain**: Solidity, Hardhat, Ethers.js
+
+---
+
+## 🛠️ Project Structure
+
+```text
+├── app/api/diagnostic/    # AI Orchestration Logic
+├── components/            # UI & 3D Components
+│   ├── AICore.tsx         # Central AI Shader Model
+│   ├── CourseViewer.tsx   # Adaptive Content Renderer
+│   └── DiagnosticAgent.tsx # AI Interview Modal
+├── context/               # Multilingual & Global State
+├── contracts/             # EduToken Smart Contract
+├── lib/                   # Supabase & AI Clients
+├── scripts/               # Blockchain & Verification Scripts
+└── supabase/              # SQL Database Schema
+```
+
+---
+
+## 🎮 Deployment
+
+The project is optimized for **Vercel** or **Netlify**.
+1. Push to your GitHub.
+2. Add your environment variables in the dashboard.
+3. The production build (`npm run build`) is verified to handle all dependency conflicts and TypeScript strictness.
+
+---
+
+## 🤝 Contributing
+Contributions are welcome! If you have ideas for new shaders, AI prompts, or language supports, feel free to open a PR.
+
+## 📝 License
+Distributed under the **MIT License**.
+
+---
+
+Built with ❤️ by Rajendra Shahi & Antigravity AI
