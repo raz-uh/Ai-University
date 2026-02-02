@@ -204,3 +204,4 @@ After setup, verify:
 Built with ❤️ using Next.js, Three.js, Gemini AI, and Ethereum
 # Ai-University
 # Ai-University
+# Ai-University
