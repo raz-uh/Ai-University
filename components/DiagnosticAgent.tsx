@@ -15,12 +15,12 @@ interface DiagnosticAgentProps {
 export default function DiagnosticAgent({ userId, language = 'English', onComplete, onClose }: DiagnosticAgentProps) {
     const { t } = useLanguage();
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [responses, setResponses] = useState<string[]>(['', '', '']);
+    const [responses, setResponses] = useState<string[]>(['', '', '', '', '']);
     const [isLoading, setIsLoading] = useState(false);
     const [thinkingIndex, setThinkingIndex] = useState(0);
     const [error, setError] = useState<string | null>(null);
 
-    const QUESTIONS = [t('q1'), t('q2'), t('q3')];
+    const QUESTIONS = [t('q1'), t('q2'), t('q3'), t('q4'), t('q5')];
     const THINKING_MESSAGES = [t('thinking1'), t('thinking2'), t('thinking3'), t('thinking4')];
 
     // Cycle thinking messages

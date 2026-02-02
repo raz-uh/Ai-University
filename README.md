@@ -13,7 +13,7 @@ A state-of-the-art decentralized learning platform featuring **AI-powered adapti
 ## 🚀 Key Features
 
 ### 🧠 AI-Driven Adaptive Learning
-- **Diagnostic Interview**: A personalized 3-question interview conducted by Gemini AI to assess your level and learning style.
+- **Diagnostic Interview**: A personalized 5-question interview conducted by Gemini AI to assess your level and learning style.
 - **Dynamic Course Generation**: AI generates full course syllabi (titles, modules, and content) customized specifically for you in real-time.
 - **Deep Personalization**: Content is tailored for **Beginner**, **Intermediate**, or **Advanced** levels across **Video**, **PDF**, or **Flashcard** preferences.
 

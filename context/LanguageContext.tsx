@@ -58,6 +58,24 @@ const translations: Translations = {
         Chinese: '你现在最感兴趣的学习话题是什么？',
         Nepali: 'अहिले तपाईं कुन विषय सिक्न सबैभन्दा इच्छुक हुनुहुन्छ?'
     },
+    q4: {
+        English: 'What is your primary goal (e.g., Career change, personal project)?',
+        Spanish: '¿Cuál es tu objetivo principal (ej., cambio de carrera, proyecto personal)?',
+        French: 'Quel est votre objectif principal (ex. reconversion, projet personnel) ?',
+        German: 'Was ist dein Hauptziel (z. B. Berufswechsel, persönliches Projekt)?',
+        Hindi: 'आपका प्राथमिक लक्ष्य क्या है (जैसे, करियर परिवर्तन, व्यक्तिगत परियोजना)?',
+        Chinese: '你的主要目标是什么（例如：职业转变、个人项目）？',
+        Nepali: 'तपाईंको मुख्य लक्ष्य के हो (जस्तै, करियर परिवर्तन, व्यक्तिगत परियोजना)?'
+    },
+    q5: {
+        English: 'How much time can you realistically dedicate to learning each week?',
+        Spanish: '¿Cuánto tiempo puedes dedicar realistamente al aprendizaje cada semana?',
+        French: 'Combien de temps pouvez-vous réellement consacrer à l\'apprentissage chaque semaine ?',
+        German: 'Wie viel Zeit kannst du realistisch pro Woche für das Lernen aufwenden?',
+        Hindi: 'आप वास्तविक रूप से प्रत्येक सप्ताह सीखने के लिए कितना समय समर्पित कर सकते हैं?',
+        Chinese: '你每周现实中能投入多少时间学习？',
+        Nepali: 'तपाईं हरेक हप्ता सिकाईमा कति समय दिन सक्नुहुन्छ?'
+    },
 
     thinking1: { English: 'Analyzing learning goals...', Spanish: 'Analizando metas...', French: 'Objectifs...', German: 'Ziele...', Hindi: 'लक्ष्य...', Chinese: '解析...', Nepali: 'सिकाई लक्ष्यहरू विश्लेषण गर्दै...' },
     thinking2: { English: 'Curating modules...', Spanish: 'Curando módulos...', French: 'Modules...', German: 'Module...', Hindi: 'मॉड्यूल...', Chinese: '策展...', Nepali: 'मोड्युलहरू क्युरेट गर्दै...' },

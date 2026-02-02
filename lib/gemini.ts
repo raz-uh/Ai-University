@@ -12,10 +12,8 @@ export async function conductDiagnosticInterview(responses: string[], language: 
 
   const prompt = `You are an adaptive learning AI. Based on these user responses to diagnostic questions:
   
-1. ${responses[0]}
-2. ${responses[1]}
-3. ${responses[2]}
-
+${responses.map((r, i) => `${i + 1}. ${r}`).join('\n')}
+  
 Analyze the user's skill level (Beginner/Intermediate/Advanced) and determine their learning preference.
 IMPORTANT: Your JSON response content (like topic names) should be in ${language}.
 HOWEVER, keep the values for "skillLevel" and "stylePreference" in English exactly as specified.
