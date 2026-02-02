@@ -7,9 +7,9 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { responses, userId, language = 'English' } = body;
 
-        if (!responses || !Array.isArray(responses) || responses.length !== 5) {
+        if (!responses || !Array.isArray(responses) || responses.length !== 8) {
             return NextResponse.json(
-                { error: 'Invalid responses. Expected array of 5 answers.' },
+                { error: 'Invalid responses. Expected array of 8 answers.' },
                 { status: 400 }
             );
         }

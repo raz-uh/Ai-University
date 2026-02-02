@@ -15,12 +15,15 @@ interface DiagnosticAgentProps {
 export default function DiagnosticAgent({ userId, language = 'English', onComplete, onClose }: DiagnosticAgentProps) {
     const { t } = useLanguage();
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [responses, setResponses] = useState<string[]>(['', '', '', '', '']);
+    const [responses, setResponses] = useState<string[]>(['', '', '', '', '', '', '', '']);
+    const [isFetchingStage2, setIsFetchingStage2] = useState(false);
+    const [dynamicQuestions, setDynamicQuestions] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [thinkingIndex, setThinkingIndex] = useState(0);
     const [error, setError] = useState<string | null>(null);
 
-    const QUESTIONS = [t('q1'), t('q2'), t('q3'), t('q4'), t('q5')];
+    const STAGE1_QUESTIONS = [t('q1'), t('q2'), t('q3'), t('q4'), t('q5')];
+    const ALL_QUESTIONS = [...STAGE1_QUESTIONS, ...dynamicQuestions];
     const THINKING_MESSAGES = [t('thinking1'), t('thinking2'), t('thinking3'), t('thinking4')];
 
     // Cycle thinking messages
@@ -40,11 +43,42 @@ export default function DiagnosticAgent({ userId, language = 'English', onComple
         setResponses(newResponses);
     };
 
-    const handleNext = () => {
-        if (currentQuestion < QUESTIONS.length - 1) {
+    const handleNext = async () => {
+        if (currentQuestion === 4 && dynamicQuestions.length === 0) {
+            // End of Stage 1 - Fetch Dynamic Questions
+            await fetchStage2Questions();
+        } else if (currentQuestion < ALL_QUESTIONS.length - 1) {
             setCurrentQuestion(currentQuestion + 1);
         } else {
             handleSubmit();
+        }
+    };
+
+    const fetchStage2Questions = async () => {
+        setIsFetchingStage2(true);
+        setError(null);
+        try {
+            const topic = responses[2]; // Topic from Q3
+            const skillLevel = responses[0]; // Experience from Q1
+
+            const response = await fetch('/api/diagnostic/questions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic, skillLevel, language }),
+            });
+
+            const data = await response.json();
+            if (data.success && data.questions) {
+                setDynamicQuestions(data.questions);
+                setCurrentQuestion(5); // Move to first dynamic question
+            } else {
+                setError('Failed to load specific questions. Proceeding with general assessment.');
+                handleSubmit(); // Fallback to submit with just 5? No, API expects 8 now.
+            }
+        } catch (err) {
+            setError('Network error loading deep-dive questions.');
+        } finally {
+            setIsFetchingStage2(false);
         }
     };
 
@@ -105,13 +139,14 @@ export default function DiagnosticAgent({ userId, language = 'English', onComple
                             {t('diagnostic_title')}
                         </h2>
                         <p className="text-indigo-200">
-                            Question {currentQuestion + 1} of {QUESTIONS.length}
+                            Question {currentQuestion + 1} of {ALL_QUESTIONS.length || 5}
+                            {currentQuestion >= 5 && <span className="ml-2 text-xs text-indigo-400 italic">(Technical Deep Dive)</span>}
                         </p>
                         <div className="mt-4 w-full bg-indigo-950 rounded-full h-2">
                             <motion.div
                                 className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full"
                                 initial={{ width: 0 }}
-                                animate={{ width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%` }}
+                                animate={{ width: `${((currentQuestion + 1) / (ALL_QUESTIONS.length || 5)) * 100}%` }}
                                 transition={{ duration: 0.3 }}
                             />
                         </div>
@@ -133,25 +168,40 @@ export default function DiagnosticAgent({ userId, language = 'English', onComple
 
                     {/* Question */}
                     <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentQuestion}
-                            initial={{ x: 50, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: -50, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="mb-6"
-                        >
-                            <label className="block text-xl text-white mb-4">
-                                {QUESTIONS[currentQuestion]}
-                            </label>
-                            <textarea
-                                value={responses[currentQuestion]}
-                                onChange={(e) => handleInputChange(e.target.value)}
-                                placeholder="Type your answer here..."
-                                className="w-full h-32 px-4 py-3 bg-indigo-950/50 border border-indigo-500/50 rounded-lg text-white placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-                                disabled={isLoading}
-                            />
-                        </motion.div>
+                        {isFetchingStage2 ? (
+                            <motion.div
+                                key="fetching"
+                                className="h-48 flex flex-col items-center justify-center space-y-4"
+                            >
+                                <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent animate-spin rounded-full" />
+                                <p className="text-indigo-200 animate-pulse">{t('q_dynamic_thinking')}</p>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key={currentQuestion}
+                                initial={{ x: 50, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -50, opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="mb-6"
+                            >
+                                {currentQuestion === 5 && (
+                                    <p className="text-sm font-bold text-indigo-400 mb-4 bg-indigo-500/10 p-3 rounded-lg border border-indigo-500/20">
+                                        ✨ {t('q_dynamic_intro')}
+                                    </p>
+                                )}
+                                <label className="block text-xl text-white mb-4">
+                                    {ALL_QUESTIONS[currentQuestion]}
+                                </label>
+                                <textarea
+                                    value={responses[currentQuestion]}
+                                    onChange={(e) => handleInputChange(e.target.value)}
+                                    placeholder="Type your answer here..."
+                                    className="w-full h-32 px-4 py-3 bg-indigo-950/50 border border-indigo-500/50 rounded-lg text-white placeholder-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                                    disabled={isLoading || isFetchingStage2}
+                                />
+                            </motion.div>
+                        )}
                     </AnimatePresence>
 
                     {/* Navigation Buttons */}
@@ -168,12 +218,12 @@ export default function DiagnosticAgent({ userId, language = 'English', onComple
 
                         <motion.button
                             onClick={handleNext}
-                            disabled={!responses[currentQuestion].trim() || isLoading}
+                            disabled={!responses[currentQuestion]?.trim() || isLoading || isFetchingStage2}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg font-semibold text-white hover:from-indigo-500 hover:to-purple-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg min-w-[140px]"
                         >
-                            {isLoading ? (
+                            {isLoading || isFetchingStage2 ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
@@ -187,11 +237,11 @@ export default function DiagnosticAgent({ userId, language = 'English', onComple
                                             exit={{ opacity: 0, y: -5 }}
                                             className="text-xs"
                                         >
-                                            {THINKING_MESSAGES[thinkingIndex]}
+                                            {isFetchingStage2 ? 'Thinking...' : THINKING_MESSAGES[thinkingIndex]}
                                         </motion.span>
                                     </AnimatePresence>
                                 </span>
-                            ) : currentQuestion === QUESTIONS.length - 1 ? (
+                            ) : currentQuestion === ALL_QUESTIONS.length - 1 && ALL_QUESTIONS.length > 5 ? (
                                 t('submit')
                             ) : (
                                 t('next')
